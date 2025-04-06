@@ -31,9 +31,10 @@ if uploaded_files:
         enhancer = ImageEnhance.Contrast(image)
         image = enhancer.enhance(2)
 
-        text = pytesseract.image_to_string(image, lang='fra')
+        text = pytesseract.image_to_string(image, lang='fra').strip()
 
-        st.markdown(f"<pre style='background-color:#111;color:#fff;padding:1em'><strong>🖼️ OCR pour le fichier : {uploaded_file.name}</strong>\n{text}</pre>", unsafe_allow_html=True)
+        st.markdown(f"**🖼️ OCR pour le fichier : {uploaded_file.name}**")
+        st.code(text)
 
         # Extraction par regex ou logique simple
         nom_match = re.search(r"(?i)(\b[A-Z][a-zéèêàâîïôûç-]{2,}\b)", text)
@@ -69,7 +70,7 @@ if uploaded_files:
             "Rareté": rarete,
             "Type": type_,
             "Fichier": uploaded_file.name,
-            "Texte OCR": text.replace('\n', ' | ')
+            "Texte OCR": text.replace('\n', ' | ').strip()
         })
 
     df = pd.DataFrame(results)
