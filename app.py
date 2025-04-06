@@ -60,8 +60,15 @@ if uploaded_files:
         st.code(text if text else "(vide)")
 
         # Extraction améliorée par regex
-        nom_match = re.search(r"\b([A-ZÉ][a-zéèêàâîïôûç-]{2,})\b", text)
-        numero_match = re.search(r"(\d{1,3})\s*/\s*(\d{1,3})", text)
+        premieres_lignes = text.split('\n')[:5]
+        nom_match = None
+        for ligne in premieres_lignes:
+            match = re.search(r"\b([A-ZÉ][a-zéèêàâîïôûç-]{2,})\b", ligne)
+            if match:
+                nom_match = match
+                break
+
+        numero_match = re.search(r"(\d{1,3})\s*[/|lI|]{1}\s*(\d{1,3})", text)
         illustrateur_match = re.search(r"(?:Illustrateur|Illus\.?)[ :]*([^\n]+)", text)
         extension_match = re.search(r"\d{3}/\d{3} (.+)", text)
 
