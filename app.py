@@ -31,10 +31,21 @@ if uploaded_files:
         enhancer = ImageEnhance.Contrast(image)
         image = enhancer.enhance(2)
 
+        # Essai avec langue française
         text = pytesseract.image_to_string(image, lang='fra').strip()
 
+        # Si l'extraction échoue, on essaie en anglais pour diagnostiquer le problème
+        if not text:
+            st.warning("⚠️ Aucun texte détecté avec 'fra'. Tentative avec 'eng'...")
+            text = pytesseract.image_to_string(image, lang='eng').strip()
+            if text:
+                st.info("✅ Texte détecté avec 'eng' (langue française probablement manquante)")
+            else:
+                st.error("❌ Aucun texte détecté avec 'eng' non plus. Tesseract ne fonctionne peut-être pas correctement.")
+
+        # Affichage OCR
         st.markdown(f"**🖼️ OCR pour le fichier : {uploaded_file.name}**")
-        st.code(text)
+        st.code(text if text else "(vide)")
 
         # Extraction par regex ou logique simple
         nom_match = re.search(r"(?i)(\b[A-Z][a-zéèêàâîïôûç-]{2,}\b)", text)
