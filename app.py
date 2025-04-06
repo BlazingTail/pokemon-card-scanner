@@ -23,18 +23,17 @@ if uploaded_files:
         image = Image.open(tmp_path)
 
         # Afficher l'image originale pour debug visuel
-        st.image(image, caption=f"Aperçu : {uploaded_file.name}", use_column_width=True)
+        st.image(image, caption=f"Aperçu : {uploaded_file.name}", use_container_width=True)
 
         # Prétraitement de l'image pour améliorer l'OCR
         image = image.convert("L")  # Grayscale
         image = image.filter(ImageFilter.MedianFilter())
         enhancer = ImageEnhance.Contrast(image)
         image = enhancer.enhance(2)
-        
+
         text = pytesseract.image_to_string(image, lang='fra')
 
-        st.text(f"\n🖼️ OCR pour le fichier : {uploaded_file.name}\n")
-        st.code(text)
+        st.markdown(f"<pre style='background-color:#111;color:#fff;padding:1em'><strong>🖼️ OCR pour le fichier : {uploaded_file.name}</strong>\n{text}</pre>", unsafe_allow_html=True)
 
         # Extraction par regex ou logique simple
         nom_match = re.search(r"(?i)(\b[A-Z][a-zéèêàâîïôûç-]{2,}\b)", text)
