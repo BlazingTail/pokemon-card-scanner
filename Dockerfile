@@ -1,6 +1,5 @@
 FROM python:3.10-slim
 
-# Installer Tesseract avec la langue française
 RUN apt-get update && \
     apt-get install -y \
         tesseract-ocr \
@@ -8,10 +7,10 @@ RUN apt-get update && \
         libglib2.0-0 \
         libsm6 \
         libxrender1 \
-        libxext6 \
-        && apt-get clean && rm -rf /var/lib/apt/lists/*
+        libxext6 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Définir le PATH manuellement
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata/
 
 WORKDIR /app

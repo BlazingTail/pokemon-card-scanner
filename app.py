@@ -75,7 +75,6 @@ if uploaded_files:
         illustrateur = illustrateur_match.group(1).strip() if illustrateur_match else "?"
         extension = extension_match.group(1).strip() if extension_match else "?"
 
-        # Affichage des champs extraits dans les logs Streamlit avec couleur conditionnelle
         def format_result(label, value):
             color = "red" if value == "?" else "green"
             return f"<span style='color:{color}'><strong>{label}:</strong> {value}</span>"
