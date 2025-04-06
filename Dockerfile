@@ -1,25 +1,26 @@
 FROM python:3.10-slim
 
-# Installer les dépendances système
+# Installer Tesseract avec la langue française
 RUN apt-get update && \
-    apt-get install -y tesseract-ocr tesseract-ocr-fra libglib2.0-0 libsm6 libxrender1 libxext6 && \
-    apt-get clean
+    apt-get install -y \
+        tesseract-ocr \
+        tesseract-ocr-fra \
+        libglib2.0-0 \
+        libsm6 \
+        libxrender1 \
+        libxext6 \
+        && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Définir la variable d'environnement Tesseract
+# Définir le PATH manuellement
 ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata/
 
-# Dossier de travail
 WORKDIR /app
 
-# Installer les dépendances Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier l'app
 COPY . .
 
-# Exposer le port Streamlit
 EXPOSE 8501
 
-# Lancer l'app
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.enableCORS=false"]
