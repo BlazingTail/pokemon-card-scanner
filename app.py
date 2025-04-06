@@ -59,21 +59,19 @@ if uploaded_files:
         st.markdown(f"**🖼️ OCR pour le fichier : {uploaded_file.name}**")
         st.code(text if text else "(vide)")
 
-        # Extraction par regex ou logique simple
-        nom_match = re.search(r"(?i)(\b[A-Z][a-zéèêàâîïôûç-]{2,}\b)", text)
-        numero_match = re.search(r"(\d{1,3}\s*/\s*\d{1,3})", text)
+        # Extraction améliorée par regex
+        nom_match = re.search(r"\b([A-ZÉ][a-zéèêàâîïôûç-]{2,})\b", text)
+        numero_match = re.search(r"(\d{1,3})\s*/\s*(\d{1,3})", text)
         illustrateur_match = re.search(r"(?:Illustrateur|Illus\.?)[ :]*([^\n]+)", text)
         extension_match = re.search(r"\d{3}/\d{3} (.+)", text)
 
         rarete = "Commune" if "●" in text else ("Peu commune" if "◆" in text else ("Rare" if "★" in text else "?"))
-        type_ = "Électrik" if "⚡" in text else ("Feu" if "🔥" in text else ("Eau" if "💧" in text else "?"))
 
         nom = nom_match.group(1) if nom_match else "?"
-        numero = numero_match.group(1) if numero_match else "?"
+        numero = f"{numero_match.group(1)}/{numero_match.group(2)}" if numero_match else "?"
         illustrateur = illustrateur_match.group(1).strip() if illustrateur_match else "?"
         extension = extension_match.group(1).strip() if extension_match else "?"
 
-        # Affichage des champs extraits dans les logs Streamlit avec couleur conditionnelle
         def format_result(label, value):
             color = "red" if value == "?" else "green"
             return f"<span style='color:{color}'><strong>{label}:</strong> {value}</span>"
@@ -83,7 +81,6 @@ if uploaded_files:
         st.markdown(format_result("Extension", extension), unsafe_allow_html=True)
         st.markdown(format_result("Illustrateur", illustrateur), unsafe_allow_html=True)
         st.markdown(format_result("Rareté", rarete), unsafe_allow_html=True)
-        st.markdown(format_result("Type", type_), unsafe_allow_html=True)
 
         results.append({
             "Nom": nom,
@@ -91,7 +88,6 @@ if uploaded_files:
             "Extension": extension,
             "Illustrateur": illustrateur,
             "Rareté": rarete,
-            "Type": type_,
             "Fichier": uploaded_file.name,
             "Texte OCR": text.replace('\n', ' | ').strip()
         })
