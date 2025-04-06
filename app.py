@@ -1,6 +1,6 @@
 import streamlit as st
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageEnhance, ImageFilter
 import pandas as pd
 import re
 import os
@@ -21,6 +21,16 @@ if uploaded_files:
             tmp_path = tmp_file.name
 
         image = Image.open(tmp_path)
+
+        # Afficher l'image originale pour debug visuel
+        st.image(image, caption=f"Aperçu : {uploaded_file.name}", use_column_width=True)
+
+        # Prétraitement de l'image pour améliorer l'OCR
+        image = image.convert("L")  # Grayscale
+        image = image.filter(ImageFilter.MedianFilter())
+        enhancer = ImageEnhance.Contrast(image)
+        image = enhancer.enhance(2)
+        
         text = pytesseract.image_to_string(image, lang='fra')
 
         st.text(f"\n🖼️ OCR pour le fichier : {uploaded_file.name}\n")
@@ -59,7 +69,8 @@ if uploaded_files:
             "Illustrateur": illustrateur,
             "Rareté": rarete,
             "Type": type_,
-            "Fichier": uploaded_file.name
+            "Fichier": uploaded_file.name,
+            "Texte OCR": text.replace('\n', ' | ')
         })
 
     df = pd.DataFrame(results)
