@@ -23,41 +23,39 @@ if uploaded_files:
             tmp_file.write(uploaded_file.read())
             tmp_path = tmp_file.name
 
-        image = Image.open(tmp_path)
+        original_image = Image.open(tmp_path)
+        st.image(original_image, caption=f"Image originale : {uploaded_file.name}", use_container_width=True)
 
-        # Afficher l'image originale pour debug visuel
-        st.image(image, caption=f"Aperçu : {uploaded_file.name}", use_container_width=True)
-
-        # Prétraitement de l'image pour améliorer l'OCR
-        image = image.convert("L")  # Grayscale
-        image = image.filter(ImageFilter.MedianFilter())
-        enhancer = ImageEnhance.Contrast(image)
-        image = enhancer.enhance(2)
-
-        # Extraction OCR avec gestion des erreurs explicites
+        # Test OCR brut sans traitement
         try:
-            text = pytesseract.image_to_string(image, lang='fra').strip()
-        except pytesseract.TesseractNotFoundError as e:
-            st.error(f"❌ Tesseract non trouvé : {e}")
-            text = ""
+            raw_text = pytesseract.image_to_string(original_image, lang='fra').strip()
         except Exception as e:
-            st.error(f"❌ Erreur inattendue avec Tesseract : {e}")
-            text = ""
+            st.error(f"❌ OCR brut échoué : {e}")
+            raw_text = ""
 
-        # Si l'extraction échoue, on essaie en anglais pour diagnostiquer le problème
-        if not text:
-            st.warning("⚠️ Aucun texte détecté avec 'fra'. Tentative avec 'eng'...")
+        if raw_text:
+            st.info("✅ Texte détecté sur image originale sans traitement :")
+            st.code(raw_text)
+            text = raw_text  # Utiliser le texte brut s'il est meilleur
+        else:
+            st.warning("❌ Aucun texte détecté en OCR brut. Tentative avec image prétraitée...")
+
+            # Prétraitement de l'image pour améliorer l'OCR
+            pre_image = original_image.convert("L")
+            pre_image = pre_image.filter(ImageFilter.MedianFilter())
+            enhancer = ImageEnhance.Contrast(pre_image)
+            pre_image = enhancer.enhance(2)
+            st.image(pre_image, caption="Image après traitement (debug)", use_container_width=True)
+
             try:
-                text = pytesseract.image_to_string(image, lang='eng').strip()
-                if text:
-                    st.info("✅ Texte détecté avec 'eng' (langue française probablement manquante)")
-                else:
-                    st.error("❌ Aucun texte détecté avec 'eng' non plus. Tesseract ne fonctionne peut-être pas correctement.")
+                text = pytesseract.image_to_string(pre_image, lang='fra').strip()
             except Exception as e:
-                st.error(f"❌ Échec également avec 'eng' : {e}")
+                st.error(f"❌ OCR échoué sur image prétraitée : {e}")
                 text = ""
 
-        # Affichage OCR
+            if not text:
+                st.error("❌ Toujours aucun texte détecté. Tesseract ne voit rien sur cette image.")
+
         st.markdown(f"**🖼️ OCR pour le fichier : {uploaded_file.name}**")
         st.code(text if text else "(vide)")
 
@@ -75,6 +73,7 @@ if uploaded_files:
         illustrateur = illustrateur_match.group(1).strip() if illustrateur_match else "?"
         extension = extension_match.group(1).strip() if extension_match else "?"
 
+        # Affichage des champs extraits dans les logs Streamlit avec couleur conditionnelle
         def format_result(label, value):
             color = "red" if value == "?" else "green"
             return f"<span style='color:{color}'><strong>{label}:</strong> {value}</span>"
