@@ -63,18 +63,21 @@ if uploaded_files:
         premieres_lignes = text.split('\n')[:5]
         nom_match = None
         for ligne in premieres_lignes:
-            match = re.search(r"\b([A-ZÉ][a-zéèêàâîïôûç-]{2,})\b", ligne)
-            if match:
-                nom_match = match
+            mots = re.findall(r"\b([A-ZÉ][a-zéèêàâîïôûç-]{2,})\b", ligne)
+            for mot in mots:
+                if mot.lower() != "pokémon":
+                    nom_match = re.match(r".*", mot)
+                    break
+            if nom_match:
                 break
 
-        numero_match = re.search(r"(\d{1,3})\s*[/|lI|]{1}\s*(\d{1,3})", text)
+        numero_match = re.search(r"(\d{1,3})\s*[/lI|]{1}\s*(\d{1,3})", text)
         illustrateur_match = re.search(r"(?:Illustrateur|Illus\.?)[ :]*([^\n]+)", text)
         extension_match = re.search(r"\d{3}/\d{3} (.+)", text)
 
         rarete = "Commune" if "●" in text else ("Peu commune" if "◆" in text else ("Rare" if "★" in text else "?"))
 
-        nom = nom_match.group(1) if nom_match else "?"
+        nom = nom_match.group(0) if nom_match else "?"
         numero = f"{numero_match.group(1)}/{numero_match.group(2)}" if numero_match else "?"
         illustrateur = illustrateur_match.group(1).strip() if illustrateur_match else "?"
         extension = extension_match.group(1).strip() if extension_match else "?"
