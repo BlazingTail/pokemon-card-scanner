@@ -6,6 +6,9 @@ import re
 import os
 import tempfile
 
+# 🔧 Spécifie manuellement le chemin de Tesseract
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
 st.set_page_config(page_title="Scan Cartes Pokémon", layout="centered")
 st.title("🧾 Scan Automatique de Cartes Pokémon")
 st.write("Uploadez vos scans (.jpg ou .png) pour extraire les informations clés.")
